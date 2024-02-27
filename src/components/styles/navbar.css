@@ -1,0 +1,11 @@
+.navbar-collapse{
+    background-color: rgb(57,104,68);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    width: 110%;
+    border-radius: 5px;
+    }
+    
