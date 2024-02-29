@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import QRCode from 'qrcode'; // Importa la librería para generar códigos QR
+import '../styles/navbar.css'
 
 const Formulario = () => {
   const [domicilios, setDomicilios] = useState([]);
@@ -25,6 +26,18 @@ const Formulario = () => {
     enfermedadesAlergias: '',
     medicamentos: ''
   });
+  const handleCancel = () => {
+    setFormData({
+      nombres: '',
+      apellidos: '',
+      cedula: '',
+      correoElectronico: '',
+      edad: '',
+      enfermedadesAlergias: '',
+      medicamentos: '',
+      domicilio: ''
+    });
+  };
 
   useEffect(() => {
     const fetchDomicilios = async () => {
@@ -50,7 +63,7 @@ const Formulario = () => {
     if (!/^\d{10}$/.test(cedula)) {
       return false;
     }
-  
+
     // Verificar el dígito verificador
     const digitoVerificador = parseInt(cedula.substring(9, 10));
     let suma = 0;
@@ -65,16 +78,16 @@ const Formulario = () => {
       }
       suma += numero;
     }
-  
+
     const resultado = suma % 10 ? 10 - (suma % 10) : 0;
-  
+
     return resultado === digitoVerificador;
   };
-  
+
   // Ejemplo de uso
   //const cedulaValida = validarCedulaEcuatoriana('0504102443');
   //console.log(cedulaValida); // Devuelve true si la cédula es válida, de lo contrario false
-  
+
 
   const validateAge = (age) => {
     const parsedAge = parseInt(age);
@@ -84,17 +97,24 @@ const Formulario = () => {
   function validarMayusculaPrimeraLetra(frase) {
     var palabras = frase.split(" ");
     var esValido = true;
-    
+
     for (var i = 0; i < palabras.length; i++) {
-      var primeraLetra = palabras[i].charAt(0);
+      var palabra = palabras[i];
+      // Verificar si la palabra contiene solo letras, incluyendo tildes y la letra "ñ"
+      if (!/^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+$/.test(palabra)) {
+        esValido = false;
+        break;
+      }
+      var primeraLetra = palabra.charAt(0);
       if (primeraLetra !== primeraLetra.toUpperCase()) {
         esValido = false;
         break;
       }
     }
-    
+
     return esValido;
   }
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -149,19 +169,19 @@ const Formulario = () => {
       // Generar el código QR con la información del formulario
       const qrData = JSON.stringify(formData);
       const qrImage = await QRCode.toDataURL(qrData);
-  
+
       // Subir la imagen del código QR a Cloudinary
       const cloudinaryResponse = await axios.post('https://api.cloudinary.com/v1_1/dlyytqayv/image/upload', {
         file: qrImage,
         upload_preset: 'QRCotopaxi'
       });
-  
+
       // Guardar la URL de la imagen de Cloudinary en la base de datos
       await axios.post('https://sistema-cotopaxi-backend.onrender.com/api/personas', {
         ...formData,
         qrURL: cloudinaryResponse.data.secure_url // Agregar qrURL al objeto formData
       });
-  
+
       setMessage('¡Persona registrada correctamente!');
       setFormData({
         nombres: '',
@@ -196,39 +216,40 @@ const Formulario = () => {
           <div className="col-md-6">
             <div className="form-group">
               <label htmlFor="nombre">Nombre:</label>
-              <input type="text" id="nombre" name="nombres" value={formData.nombres} onChange={handleChange} className="form-control" required />
+              <input type="text" id="nombre" name="nombres" placeholder="Ingrese sus nombres separados por un espacio" value={formData.nombres} onChange={handleChange} className="form-control" required />
               {formErrors.nombres && <p className="text-danger">{formErrors.nombres}</p>}
             </div>
             <div className="form-group">
               <label htmlFor="apellido">Apellido:</label>
-              <input type="text" id="apellido" name="apellidos" value={formData.apellidos} onChange={handleChange} className="form-control" required />
+              <input type="text" id="apellido" name="apellidos" placeholder="Ingrese sus apellidos separado por un espacio" value={formData.apellidos} onChange={handleChange} className="form-control" required />
               {formErrors.apellidos && <p className="text-danger">{formErrors.apellidos}</p>}
             </div>
             <div className="form-group">
               <label htmlFor="cedula">Cédula:</label>
-              <input type="text" maxLength="10" id="cedula" name="cedula" value={formData.cedula} onChange={handleChange} className="form-control" required />
+              <input type="text" maxLength="10" id="cedula" name="cedula" placeholder="05XXXXXXXX" value={formData.cedula} onChange={handleChange} className="form-control" required />
               {formErrors.cedula && <p className="text-danger">{formErrors.cedula}</p>}
             </div>
             <div className="form-group">
               <label htmlFor="correo">Correo Electrónico:</label>
-              <input type="text" id="correo" name="correoElectronico" value={formData.correoElectronico} onChange={handleChange} className="form-control" required />
+              <input type="text" id="correo" name="correoElectronico" placeholder="pruba@gmail.com" value={formData.correoElectronico} onChange={handleChange} className="form-control" required />
               {formErrors.correoElectronico && <p className="text-danger">{formErrors.correoElectronico}</p>}
             </div>
           </div>
           <div className="col-md-6">
             <div className="form-group">
               <label htmlFor="edad">Edad:</label>
-              <input type="number" id="edad" name="edad" value={formData.edad} onChange={handleChange} className="form-control" required />
+              <input type="number" id="edad" name="edad" placeholder="Ingrese su edad en números" min="1"
+                max="120" value={formData.edad} onChange={handleChange} className="form-control" required />
               {formErrors.edad && <p className="text-danger">{formErrors.edad}</p>}
             </div>
             <div className="form-group">
               <label htmlFor="enfermedades">Enfermedades o Alergias:</label>
-              <input type="text" id="enfermedades" name="enfermedadesAlergias" value={formData.enfermedadesAlergias} onChange={handleChange} className="form-control" />
+              <input type="text" id="enfermedades" name="enfermedadesAlergias" placeholder="Ingrese enfermedades o alergias que posea" value={formData.enfermedadesAlergias} onChange={handleChange} className="form-control" />
               {formErrors.enfermedadesAlergias && <p className="text-danger">{formErrors.enfermedadesAlergias}</p>}
             </div>
             <div className="form-group">
               <label htmlFor="medicamento">Medicamento:</label>
-              <input type="text" id="medicamento" name="medicamentos" value={formData.medicamentos} onChange={handleChange} className="form-control" />
+              <input type="text" id="medicamento" name="medicamentos" placeholder="Ingrese el tipo demedicamento que toma" value={formData.medicamentos} onChange={handleChange} className="form-control" />
               {formErrors.medicamentos && <p className="text-danger">{formErrors.medicamentos}</p>}
             </div>
             <div className="form-group">
@@ -241,7 +262,7 @@ const Formulario = () => {
                 className="form-control"
                 required
               >
-                <option value="">Seleccione un domicilio</option>
+                <option value="">Seleccione su localidad</option>
                 {loading ? (
                   <option disabled>Cargando domicilios...</option>
                 ) : (
@@ -256,14 +277,14 @@ const Formulario = () => {
           </div>
         </div>
         <div className="form-group text-center">
-          <button type="submit" className="btn btn-success">Registrar</button>
-          <button type="button" className="btn btn-secondary" onClick={() => console.log('Registro cancelado')}>
-            Cancelar
-          </button>
+          <div className="button-container">
+            <button type="submit" className="btn btn-success">Registrar</button>
+            <button type="button" className="btn btn-secondary" onClick={handleCancel}> Cancelar</button>
+          </div>
         </div>
         {message && <p className="text-success text-center">{message}</p>}
-      </form>
-    </div>
+      </form >
+    </div >
   );
 };
 

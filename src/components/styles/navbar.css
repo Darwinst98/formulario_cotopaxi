@@ -8,4 +8,7 @@
     width: 110%;
     border-radius: 5px;
     }
+    .button-container button {
+        margin-right:50px; /* Define el margen derecho deseado para todos los botones dentro del contenedor */
+      }
     
