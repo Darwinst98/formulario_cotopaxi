@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import QRCode from 'qrcode'; // Importa la librería para generar códigos QR
-import '../styles/navbar.css'
+import '../styles/navbar.css';
 
 const Formulario = () => {
   const [domicilios, setDomicilios] = useState([]);
@@ -16,7 +16,7 @@ const Formulario = () => {
     medicamentos: '',
     lugarResidencia: ''
   });
-  const [message, setMessage] = useState('');
+  const [modalVisible, setModalVisible] = useState(false); // Estado para controlar la visibilidad del modal
   const [formErrors, setFormErrors] = useState({
     nombres: '',
     apellidos: '',
@@ -26,6 +26,9 @@ const Formulario = () => {
     enfermedadesAlergias: '',
     medicamentos: ''
   });
+  const [errorModalVisible, setErrorModalVisible] = useState(false); // Estado para controlar la visibilidad del modal de error
+  const [errorRegistroModalVisible, setErrorRegistroModalVisible] = useState(false); // Estado para controlar la visibilidad del modal de error de registro
+
   const handleCancel = () => {
     setFormData({
       nombres: '',
@@ -35,7 +38,17 @@ const Formulario = () => {
       edad: '',
       enfermedadesAlergias: '',
       medicamentos: '',
-      domicilio: ''
+      lugarResidencia: ''
+    });
+    // Restablecer los mensajes de error a cadena vacía
+    setFormErrors({
+      nombres: '',
+      apellidos: '',
+      cedula: '',
+      correoElectronico: '',
+      edad: '',
+      enfermedadesAlergias: '',
+      medicamentos: ''
     });
   };
 
@@ -84,11 +97,6 @@ const Formulario = () => {
     return resultado === digitoVerificador;
   };
 
-  // Ejemplo de uso
-  //const cedulaValida = validarCedulaEcuatoriana('0504102443');
-  //console.log(cedulaValida); // Devuelve true si la cédula es válida, de lo contrario false
-
-
   const validateAge = (age) => {
     const parsedAge = parseInt(age);
     return !isNaN(parsedAge) && parsedAge >= 1 && parsedAge <= 120;
@@ -115,7 +123,6 @@ const Formulario = () => {
     return esValido;
   }
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     let errorMessage = '';
@@ -126,7 +133,7 @@ const Formulario = () => {
       case 'enfermedadesAlergias':
       case 'medicamentos':
         if (!validarMayusculaPrimeraLetra(value)) {
-          errorMessage = 'La primera letra de cada palabra debe empesar con mayuscula, no debe ingresar números';
+          errorMessage = 'La primera letra de cada palabra debe empezar con mayúscula y no debe ingresar números';
         }
         break;
       case 'cedula':
@@ -165,6 +172,18 @@ const Formulario = () => {
     // Validar aquí que no haya errores en el formulario antes de enviar los datos
     // Por ejemplo, puedes verificar que los campos no estén vacíos y que no haya errores en formErrors
     // Si hay algún error, muestra un mensaje al usuario y no envíes el formulario
+    let isValid = true;
+    Object.values(formErrors).forEach((error) => {
+      if (error.length > 0) {
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      setErrorModalVisible(true);
+      return;
+    }
+
     try {
       // Generar el código QR con la información del formulario
       const qrData = JSON.stringify(formData);
@@ -182,7 +201,9 @@ const Formulario = () => {
         qrURL: cloudinaryResponse.data.secure_url // Agregar qrURL al objeto formData
       });
 
-      setMessage('¡Persona registrada correctamente!');
+      // Mostrar el modal de éxito
+      setModalVisible(true);
+
       setFormData({
         nombres: '',
         apellidos: '',
@@ -204,7 +225,8 @@ const Formulario = () => {
       });
     } catch (error) {
       console.error('Error al registrar persona:', error);
-      setMessage('Hubo un error al registrar la persona.');
+      setErrorRegistroModalVisible(true);
+      //setMessage('Hubo un error al registrar la persona.');
     }
   };
 
@@ -231,25 +253,24 @@ const Formulario = () => {
             </div>
             <div className="form-group">
               <label htmlFor="correo">Correo Electrónico:</label>
-              <input type="text" id="correo" name="correoElectronico" placeholder="pruba@gmail.com" value={formData.correoElectronico} onChange={handleChange} className="form-control" required />
+              <input type="text" id="correo" name="correoElectronico" placeholder="prueba@gmail.com" value={formData.correoElectronico} onChange={handleChange} className="form-control" required />
               {formErrors.correoElectronico && <p className="text-danger">{formErrors.correoElectronico}</p>}
             </div>
           </div>
           <div className="col-md-6">
             <div className="form-group">
               <label htmlFor="edad">Edad:</label>
-              <input type="number" id="edad" name="edad" placeholder="Ingrese su edad en números" min="1"
-                max="120" value={formData.edad} onChange={handleChange} className="form-control" required />
+              <input type="number" id="edad" name="edad" placeholder="Ingrese su edad en números" min="1" max="120" value={formData.edad} onChange={handleChange} className="form-control" required />
               {formErrors.edad && <p className="text-danger">{formErrors.edad}</p>}
             </div>
             <div className="form-group">
               <label htmlFor="enfermedades">Enfermedades o Alergias:</label>
-              <input type="text" id="enfermedades" name="enfermedadesAlergias" placeholder="Ingrese enfermedades o alergias que posea" value={formData.enfermedadesAlergias} onChange={handleChange} className="form-control" />
+              <input type="text" id="enfermedades" name="enfermedadesAlergias" placeholder="Ingrese enfermedades o alergias que posea" value={formData.enfermedadesAlergias} onChange={handleChange} className="form-control" required />
               {formErrors.enfermedadesAlergias && <p className="text-danger">{formErrors.enfermedadesAlergias}</p>}
             </div>
             <div className="form-group">
               <label htmlFor="medicamento">Medicamento:</label>
-              <input type="text" id="medicamento" name="medicamentos" placeholder="Ingrese el tipo demedicamento que toma" value={formData.medicamentos} onChange={handleChange} className="form-control" />
+              <input type="text" id="medicamento" name="medicamentos" placeholder="Ingrese el tipo de medicamento que toma" value={formData.medicamentos} onChange={handleChange} className="form-control" required />
               {formErrors.medicamentos && <p className="text-danger">{formErrors.medicamentos}</p>}
             </div>
             <div className="form-group">
@@ -279,12 +300,80 @@ const Formulario = () => {
         <div className="form-group text-center">
           <div className="button-container">
             <button type="submit" className="btn btn-success">Registrar</button>
-            <button type="button" className="btn btn-secondary" onClick={handleCancel}> Cancelar</button>
+            <button type="button" className="btn btn-secondary" onClick={handleCancel}>Cancelar</button>
           </div>
         </div>
-        {message && <p className="text-success text-center">{message}</p>}
-      </form >
-    </div >
+      </form>
+
+      {/* Modal de éxito */}
+      <div className={`modal fade ${modalVisible ? 'show' : ''}`} style={{ display: modalVisible ? 'block' : 'none' }}>
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">¡Registro exitoso!</h5>
+              <button type="button" className="btn-close" onClick={() => setModalVisible(false)}></button>
+            </div>
+            <div className="modal-body">
+              <p>Felicidades, te has registrado con éxito.</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-primary" onClick={() => setModalVisible(false)}>Cerrar</button>
+            </div>
+          </div>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">¡As sido asignado al Albergue: !</h5>
+              <button type="button" className="btn-close" onClick={() => setModalVisible(false)}></button>
+            </div>
+            <div className="modal-body">
+              <p>Recuerda los datos ingresados en los campos nombre y cédula son las credenciales de acceso a la App Móvil</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-primary" onClick={() => setModalVisible(false)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fin del modal de éxito */}
+
+      {/* Modal de error */}
+      <div className={`modal fade ${errorModalVisible ? 'show' : ''}`} style={{ display: errorModalVisible ? 'block' : 'none' }}>
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">¡Error!</h5>
+              <button type="button" className="btn-close" onClick={() => setErrorModalVisible(false)}></button>
+            </div>
+            <div className="modal-body">
+              <p>No cumples con todas las restricciones. Intenta nuevamente.</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-primary" onClick={() => setErrorModalVisible(false)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fin del modal de error */}
+
+      {/* Modal de error de registro */}
+      <div className={`modal fade ${errorRegistroModalVisible ? 'show' : ''}`} style={{ display: errorRegistroModalVisible ? 'block' : 'none' }}>
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">¡Error de Registro!</h5>
+              <button type="button" className="btn-close" onClick={() => setErrorRegistroModalVisible(false)}></button>
+            </div>
+            <div className="modal-body">
+              <p>Este usuario ya se encuentra registrado en el sistema.</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-primary" onClick={() => setErrorRegistroModalVisible(false)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fin del modal de error de registro */}
+    </div>
   );
 };
 
