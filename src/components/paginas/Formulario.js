@@ -265,12 +265,12 @@ const Formulario = () => {
             </div>
             <div className="form-group">
               <label htmlFor="enfermedades">Enfermedades o Alergias:</label>
-              <input type="text" id="enfermedades" name="enfermedadesAlergias" placeholder="Ingrese enfermedades o alergias que posea" value={formData.enfermedadesAlergias} onChange={handleChange} className="form-control" required />
+              <input type="text" id="enfermedades" name="enfermedadesAlergias" placeholder="Ingrese enfermedades o alergias que posea" value={formData.enfermedadesAlergias} onChange={handleChange} className="form-control" required/>
               {formErrors.enfermedadesAlergias && <p className="text-danger">{formErrors.enfermedadesAlergias}</p>}
             </div>
             <div className="form-group">
               <label htmlFor="medicamento">Medicamento:</label>
-              <input type="text" id="medicamento" name="medicamentos" placeholder="Ingrese el tipo de medicamento que toma" value={formData.medicamentos} onChange={handleChange} className="form-control" required />
+              <input type="text" id="medicamento" name="medicamentos" placeholder="Ingrese el tipo de medicamento que toma" value={formData.medicamentos} onChange={handleChange} className="form-control" required/>
               {formErrors.medicamentos && <p className="text-danger">{formErrors.medicamentos}</p>}
             </div>
             <div className="form-group">
@@ -315,18 +315,6 @@ const Formulario = () => {
             </div>
             <div className="modal-body">
               <p>Felicidades, te has registrado con éxito.</p>
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-primary" onClick={() => setModalVisible(false)}>Cerrar</button>
-            </div>
-          </div>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">¡As sido asignado al Albergue: !</h5>
-              <button type="button" className="btn-close" onClick={() => setModalVisible(false)}></button>
-            </div>
-            <div className="modal-body">
-              <p>Recuerda los datos ingresados en los campos nombre y cédula son las credenciales de acceso a la App Móvil</p>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-primary" onClick={() => setModalVisible(false)}>Cerrar</button>
