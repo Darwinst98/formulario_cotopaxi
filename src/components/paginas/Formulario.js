@@ -271,7 +271,7 @@ const Formulario = () => {
               <input type="number" id="edad" name="edad" placeholder="Ingrese su edad en números" min="1" max="120" value={formData.edad} onChange={handleChange} className="form-control" required />
               {formErrors.edad && <p className="text-danger">{formErrors.edad}</p>}
             </div>
-           {/*SelectEnfermedades */}
+           {/*SelectEnfermedades */} 
             <div className="form-group">
               <label htmlFor="enfermedades">Enfermedades o Alergias:</label>
               <select
