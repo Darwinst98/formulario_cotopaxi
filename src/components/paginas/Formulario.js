@@ -5,6 +5,7 @@ import '../styles/navbar.css';
 
 const Formulario = () => {
   const [domicilios, setDomicilios] = useState([]);
+  const [personas, setPersonas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     nombres: '',
@@ -63,6 +64,18 @@ const Formulario = () => {
     };
 
     fetchDomicilios();
+
+    const fetchPersonas = async () => {
+      try {
+        const response = await axios.get('https://sistema-cotopaxi-backend.onrender.com/api/personas');
+        setPersonas(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching personas:', error);
+      }
+    };
+
+    fetchPersonas();
   }, []);
 
   const validateEmail = (email) => {
@@ -258,15 +271,51 @@ const Formulario = () => {
               <input type="number" id="edad" name="edad" placeholder="Ingrese su edad en números" min="1" max="120" value={formData.edad} onChange={handleChange} className="form-control" required />
               {formErrors.edad && <p className="text-danger">{formErrors.edad}</p>}
             </div>
+           
             <div className="form-group">
               <label htmlFor="enfermedades">Enfermedades o Alergias:</label>
-              <input type="text" id="enfermedades" name="enfermedadesAlergias" placeholder="Ingrese enfermedades o alergias que posea" value={formData.enfermedadesAlergias} onChange={handleChange} className="form-control" required />
-              {formErrors.enfermedadesAlergias && <p className="text-danger">{formErrors.enfermedadesAlergias}</p>}
+              <select
+                id="enfermedades"
+                name="enfermedadesAlergias"
+                value={formData.enfermedadesAlergias}
+                onChange={handleChange}
+                className="form-control"
+                required
+              >
+                <option value="">Seleccione enfermedad o alergia</option>
+                {loading ? (
+                  <option disabled>Cargando...</option>
+                ) : (
+                  personas.map((enfermedad) => (
+                    <option key={enfermedad._id} value={enfermedad._id}>
+                      {enfermedad.enfermedadesAlergias}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
+            
             <div className="form-group">
               <label htmlFor="medicamento">Medicamento:</label>
-              <input type="text" id="medicamento" name="medicamentos" placeholder="Ingrese el tipo de medicamento que toma" value={formData.medicamentos} onChange={handleChange} className="form-control" required />
-              {formErrors.medicamentos && <p className="text-danger">{formErrors.medicamentos}</p>}
+              <select
+                id="medicamento"
+                name="medicamentos"
+                value={formData.medicamentos}
+                onChange={handleChange}
+                className="form-control"
+                required
+              >
+                <option value="">Seleccione su medicamento</option>
+                {loading ? (
+                  <option disabled>Cargando medicamentos...</option>
+                ) : (
+                  personas.map((medicamento) => (
+                    <option key={medicamento._id} value={medicamento._id}>
+                      {medicamento.medicamentos}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
             <div className="form-group">
               <label htmlFor="residencia">Lugar de Residencia:</label>
